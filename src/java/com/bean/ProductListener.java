@@ -6,10 +6,18 @@
 
 package com.bean;
 
+import javax.jms.Message;
+import javax.jms.MessageListener;
+
 /**
  *
  * @author c0644881
  */
-public class ProductListener {
+public class ProductListener implements MessageListener {
+
+    @Override
+    public void onMessage(Message message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

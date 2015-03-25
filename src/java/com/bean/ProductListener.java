@@ -14,7 +14,8 @@ import javax.jms.MessageListener;
  * @author c0644881
  */
 public class ProductListener implements MessageListener {
-
+    private ProductList productList;
+    
     @Override
     public void onMessage(Message message) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

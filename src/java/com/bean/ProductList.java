@@ -31,9 +31,9 @@ public class ProductList {
         
     }
     public Product get(int id){
-    
+        return null;
     }
     public JsonArray  toJSON(){
-        
+        return null;
     } 
 }

@@ -51,15 +51,22 @@ public class ProductList {
     }
 
     public void add(Product product) {
-
+        productList.add(product);
     }
 
     public void remove(Product product) {
-
+        productList.remove(product);
     }
 
     public void remove(int id) {
-
+        int index = 0;
+        for(int i=0; i<productList.size();i++){
+            if(productList.get(i).getProductID() == id){
+               index = i; 
+            }
+        }
+        productList.remove(index);
+        
     }
 
     public void set(int id, Product product) {

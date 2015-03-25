@@ -6,10 +6,13 @@
 
 package com.bean;
 
+import javax.ejb.Stateful;
+
 /**
  *
  * @author c0644881
  */
+@Stateful
 public class Product {
     private int ProductID;
     private String Name;

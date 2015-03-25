@@ -7,12 +7,14 @@
 package com.bean;
 
 import java.util.List;
+import javax.ejb.Singleton;
 import javax.json.JsonArray;
 
 /**
  *
  * @author c0644881
  */
+@Singleton
 public class ProductList {
     private List<Product> productList;
     ProductList(){

@@ -25,8 +25,7 @@ import javax.json.JsonObjectBuilder;
  */
 @Singleton
 public class ProductList {
-    @EJB
-    Product product;
+   
 
     private List<Product> productList;
     
@@ -37,7 +36,8 @@ public class ProductList {
             String query = "SELECT * FROM products";
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
+            while (rs.next()) {   
+                Product product = new Product();
                 product.setProductID(rs.getInt("product_id"));
                 product.setName(rs.getString("name"));
                 product.setDescription(rs.getString("description"));
@@ -59,7 +59,7 @@ public class ProductList {
     }
 
     public void remove(int id) {
-        int index = 0;
+        int index = -1;
         for(int i=0; i<productList.size();i++){
             if(productList.get(i).getProductID() == id){
                index = i; 
@@ -74,10 +74,32 @@ public class ProductList {
     }
 
     public Product get(int id) {
-        return null;
+        int index = -1;
+        for(int i=0; i<productList.size();i++){
+            if(productList.get(i).getProductID() == id){
+               index = i; 
+            }
+        }
+        if(index == -1){
+            return null;
+        }
+        else{
+            return productList.get(index);
+        }
     }
 
     public JsonArray toJSON() {
-        return null;
+       JsonArrayBuilder jarray = Json.createArrayBuilder();
+            
+            for(int i=0; i<productList.size();i++){
+                JsonObjectBuilder obj = Json.createObjectBuilder()
+                        .add("productId",productList.get(i).getProductID())
+                        .add("name", productList.get(i).getName())
+                        .add("description", productList.get(i).getDescription())
+                        .add("quantity", productList.get(i).getQuantity());
+                jarray.add(obj);
+
+            }
+            return (JsonArray) jarray;
     }
 }

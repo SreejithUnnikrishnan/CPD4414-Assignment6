@@ -90,7 +90,6 @@ public class ProductList {
 
     public JsonArray toJSON() {
        JsonArrayBuilder jarray = Json.createArrayBuilder();
-            
             for(int i=0; i<productList.size();i++){
                 JsonObjectBuilder obj = Json.createObjectBuilder()
                         .add("productId",productList.get(i).getProductID())

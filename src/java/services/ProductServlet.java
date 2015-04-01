@@ -8,22 +8,24 @@ package services;
 
 
 
+import com.bean.Product;
+import com.bean.ProductList;
 import com.database.DatabaseConnection;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
 import javax.json.stream.JsonParser;
@@ -44,76 +46,84 @@ import javax.ws.rs.core.UriInfo;
  * @author c0644881
  */
 @Path("/products")
+@RequestScoped
 public class ProductServlet {
+    
+    @Inject
+    ProductList productList;
 
     @GET
     @Produces("application/json")
-    public String doGet() {
-        String result = getResults("SELECT * FROM products");
-        return result;
+    public Response doGet() {
+        //String result = getResults("SELECT * FROM products");
+        //return result;
+        return Response.ok(productList.toJSON()).build();
+        
     }
 
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public String doGet(@PathParam("id") String id) {
-        String result = getProduct("SELECT * FROM products WHERE product_id = ?", id);
-        return result;
+    public Response doGet(@PathParam("id") String id) {
+//        String result = getProduct("SELECT * FROM products WHERE product_id = ?", id);
+//        return result;
+       return Response.ok(productList.get(Integer.parseInt(id)).toJSON()).build();
+        
     }
 
-    private String getResults(String query) {
+//    private String getResults(String query) {
+//
+//        try (Connection connection = DatabaseConnection.getConnection()) {
+//            StringWriter out = new StringWriter();
+//            JsonArrayBuilder jarray = Json.createArrayBuilder();
+//            PreparedStatement pstmt = connection.prepareStatement(query);
+//            ResultSet rs = pstmt.executeQuery();
+//            while (rs.next()) {
+//                JsonObjectBuilder obj = Json.createObjectBuilder()
+//                        .add("productId", rs.getInt("product_id"))
+//                        .add("name", rs.getString("name"))
+//                        .add("description", rs.getString("description"))
+//                        .add("quantity", rs.getInt("quantity"));
+//                jarray.add(obj);
+//
+//            }
+//            return jarray.build().toString();
+//
+//        } catch (SQLException ex) {
+//            System.out.println("Exception in getting database connection: " + ex.getMessage());
+//            return "Sorry... Something went wrong";
+//        }
+//
+//    }
 
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            StringWriter out = new StringWriter();
-            JsonArrayBuilder jarray = Json.createArrayBuilder();
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                JsonObjectBuilder obj = Json.createObjectBuilder()
-                        .add("productId", rs.getInt("product_id"))
-                        .add("name", rs.getString("name"))
-                        .add("description", rs.getString("description"))
-                        .add("quantity", rs.getInt("quantity"));
-                jarray.add(obj);
-
-            }
-            return jarray.build().toString();
-
-        } catch (SQLException ex) {
-            System.out.println("Exception in getting database connection: " + ex.getMessage());
-            return "Sorry... Something went wrong";
-        }
-
-    }
-
-    private String getProduct(String query, String... params) {
-        StringBuilder stringBuilder = new StringBuilder();
-        StringWriter out = new StringWriter();
-        int count = 0;
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            for (int i = 1; i <= params.length; i++) {
-                pstmt.setString(i, params[i - 1]);
-            }
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                JsonGeneratorFactory factory = Json.createGeneratorFactory(null);
-                JsonGenerator gen = factory.createGenerator(out);
-                gen.writeStartObject()
-                        .write("productId", rs.getInt("product_id"))
-                        .write("name", rs.getString("name"))
-                        .write("description", rs.getString("description"))
-                        .write("quantity", rs.getInt("quantity"))
-                        .writeEnd();
-
-                gen.close();
-            }
-
-        } catch (SQLException ex) {
-            System.out.println("Exception in getting database connection: " + ex.getMessage());
-        }
-        return out.toString();
-    }
+//    private String getProduct(String query, String... params) {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        StringWriter out = new StringWriter();
+//        int count = 0;
+//        try (Connection connection = DatabaseConnection.getConnection()) {
+//            PreparedStatement pstmt = connection.prepareStatement(query);
+//            for (int i = 1; i <= params.length; i++) {
+//                pstmt.setString(i, params[i - 1]);
+//            }
+//            ResultSet rs = pstmt.executeQuery();
+//            while (rs.next()) {
+//                JsonGeneratorFactory factory = Json.createGeneratorFactory(null);
+//                JsonGenerator gen = factory.createGenerator(out);
+//                gen.writeStartObject()
+//                        .write("productId", rs.getInt("product_id"))
+//                        .write("name", rs.getString("name"))
+//                        .write("description", rs.getString("description"))
+//                        .write("quantity", rs.getInt("quantity"))
+//                        .writeEnd();
+//
+//                gen.close();
+//            }
+//
+//        } catch (SQLException ex) {
+//            System.out.println("Exception in getting database connection: " + ex.getMessage());
+//        }
+//        return out.toString();
+//    }
 
     @POST
     @Consumes("application/json")
@@ -173,6 +183,7 @@ public class ProductServlet {
     @Path("{id}")
     @Consumes("application/json")
     public Response doPut(@Context UriInfo uri, @PathParam("id") String id, String str) {
+        Product product = null;
         int changes = 0;
         JsonParser parser = Json.createParser(new StringReader(str));
         Map<String, String> map = new HashMap<>();
@@ -193,38 +204,36 @@ public class ProductServlet {
                     break;
             }
         }
-
-        String product_name = map.get("name");
-        String description = map.get("description");
-        String quantity = map.get("quantity");
-
-        changes = doUpdate("update products set product_id = ?, name = ?, description = ?, quantity = ? where product_id = ?", id, product_name, description, quantity, id);
-        if (changes > 0) {
-            //String res = "http://localhost:8080/CPD4414-Assignment5/webresources/products/" + id;
-            return Response.ok(uri.getAbsolutePath().toString()).build();
-        } else {
+        product.setProductID(Integer.parseInt(id));
+        product.setName(map.get("name"));
+        product.setDescription(map.get("description"));
+        product.setQuantity(Integer.parseInt(map.get("quantity")));
+        try {
+            productList.set(Integer.parseInt(id), product);
+            return Response.ok().build();
+        } catch (Exception ex) {
             return Response.status(500).build();
         }
 
     }
 
-    private int doUpdate(String query, String id, String name, String description, String quantity, String pid) {
-        int numChanges = 0;
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setString(1, id);
-            pstmt.setString(2, name);
-            pstmt.setString(3, description);
-            pstmt.setString(4, quantity);
-            pstmt.setString(5, pid);
-            numChanges = pstmt.executeUpdate();
-            return numChanges;
-        } catch (SQLException ex) {
-            System.out.println("Sql Exception: " + ex.getMessage());
-            return numChanges;
-        }
-
-    }
+//    private int doUpdate(String query, String id, String name, String description, String quantity, String pid) {
+//        int numChanges = 0;
+//        try (Connection connection = DatabaseConnection.getConnection()) {
+//            PreparedStatement pstmt = connection.prepareStatement(query);
+//            pstmt.setString(1, id);
+//            pstmt.setString(2, name);
+//            pstmt.setString(3, description);
+//            pstmt.setString(4, quantity);
+//            pstmt.setString(5, pid);
+//            numChanges = pstmt.executeUpdate();
+//            return numChanges;
+//        } catch (SQLException ex) {
+//            System.out.println("Sql Exception: " + ex.getMessage());
+//            return numChanges;
+//        }
+//
+//    }
 
     @DELETE
     @Path("{id}")

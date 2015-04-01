@@ -3,22 +3,40 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.bean;
 
+import java.io.StringReader;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
+import javax.json.Json;
+import javax.json.JsonObject;
 
 /**
  *
  * @author c0644881
  */
+@MessageDriven(mappedName = "jms/Queue")
 public class ProductListener implements MessageListener {
+    @Inject
     private ProductList productList;
-    
+
     @Override
     public void onMessage(Message message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            if (message instanceof TextMessage) {
+                String json = ((TextMessage) message).getText();
+                JsonObject obj = Json.createReader(new StringReader(json)).readObject();
+                productList.add(new Product(obj));
+                
+            }
+        } catch (JMSException ex) {
+            System.out.println("Exceoption in JMS: " + ex.getMessage());
+        }
+
     }
-    
+
 }

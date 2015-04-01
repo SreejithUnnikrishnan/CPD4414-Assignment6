@@ -7,6 +7,9 @@
 package com.bean;
 
 import javax.ejb.Stateful;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  *
@@ -18,6 +21,16 @@ public class Product {
     private String Name;
     private String Description;
     private int Quantity;
+
+    public Product() {
+    }
+
+    Product(JsonObject obj) {
+      this.setProductID(obj.getInt("id"));
+      this.setName(obj.getString("name"));
+      this.setQuantity(obj.getInt("quantity"));
+      this.setDescription(obj.getString("description"));
+    }
 
     public int getProductID() {
         return ProductID;
@@ -51,6 +64,15 @@ public class Product {
         this.Quantity = Quantity;
     }
     
+    public Object toJSON(){
+        JsonObjectBuilder obj = Json.createObjectBuilder()
+                .add("productId", ProductID)
+                .add("name", Name)
+                .add("description", Description)
+                .add("quantity", Quantity);
+        return obj.build();
+    }
+
     
     
 }

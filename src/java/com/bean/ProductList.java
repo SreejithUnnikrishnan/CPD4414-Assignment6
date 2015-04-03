@@ -49,7 +49,7 @@ public class ProductList {
 
     public void add(Product product) throws Exception {
         int changes = 0;
-        changes = doInsert("INSERT INTO products (product_id, name, description, quantity) VALUES (?, ?, ?, ?)", product.getProductID(),product.getName(),product.getDescription(),product.getQuantity());
+        changes = doInsert("INSERT INTO products (product_id, name, description, quantity) VALUES (?, ?, ?, ?)", product.getProductID(), product.getName(), product.getDescription(), product.getQuantity());
         if (changes > 0) {
             productList.add(product);
         } else {
@@ -61,14 +61,21 @@ public class ProductList {
         productList.remove(product);
     }
 
-    public void remove(int id) {
-        int index = -1;
-        for (int i = 0; i < productList.size(); i++) {
-            if (productList.get(i).getProductID() == id) {
-                index = i;
+    public void remove(int id) throws Exception {
+        int changes = 0;
+        changes = doRemove("delete from products where product_id = ?", id);
+        if (changes > 0) {
+            int index = -1;
+            for (int i = 0; i < productList.size(); i++) {
+                if (productList.get(i).getProductID() == id) {
+                    index = i;
+                }
             }
+            productList.remove(index);
         }
-        productList.remove(index);
+        else{
+            throw new Exception("DeleteException");
+        }
 
     }
 
@@ -130,7 +137,7 @@ public class ProductList {
         }
 
     }
-    
+
     private int doInsert(String query, int id, String name, String description, int quantity) {
         int numChanges = 0;
         try (Connection connection = DatabaseConnection.getConnection()) {
@@ -146,5 +153,19 @@ public class ProductList {
             return numChanges;
         }
 
+    }
+
+    private int doRemove(String query, int id) {
+        int numChanges = 0;
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, id);
+            numChanges = pstmt.executeUpdate();
+
+        } catch (SQLException ex) {
+            System.out.println("Sql Exception: " + ex.getMessage());
+
+        }
+        return numChanges;
     }
 }

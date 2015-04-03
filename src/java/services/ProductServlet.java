@@ -169,8 +169,6 @@ public class ProductServlet {
 //        }
     }
 
-    
-
     @PUT
     @Path("{id}")
     @Consumes("application/json")
@@ -230,43 +228,12 @@ public class ProductServlet {
     @DELETE
     @Path("{id}")
     public Response doDelete(@Context UriInfo uri, @PathParam("id") String id) {
-        int changes = 0;
 
-        changes = doRemove("delete from products where product_id = ?", id);
-        if (changes > 0) {
+        try {
+            productList.remove(Integer.parseInt(id));
             return Response.ok().build();
-        } else {
+        } catch (Exception ex) {
             return Response.status(500).build();
-        }
-
-    }
-
-    private int getId(String query) {
-        int id = 0;
-        //String jsonArray = null;      
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                id = rs.getInt(1);
-            }
-
-        } catch (SQLException ex) {
-            System.out.println("Exception in getting database connection: " + ex.getMessage());
-        }
-        return id;
-    }
-
-    private int doRemove(String query, String id) {
-        int numChanges = 0;
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setString(1, id);
-            numChanges = pstmt.executeUpdate();
-            return numChanges;
-        } catch (SQLException ex) {
-            System.out.println("Sql Exception: " + ex.getMessage());
-            return numChanges;
         }
 
     }

@@ -111,7 +111,7 @@ public class ProductServlet {
     @POST
     @Consumes("application/json")
     public Response doPost(@Context UriInfo uri, String str) {
-        Product product = null;
+        Product product = new Product();
         JsonParser parser = Json.createParser(new StringReader(str));
         Map<String, String> map = new HashMap<>();
         String name = "", value;
@@ -122,23 +122,26 @@ public class ProductServlet {
                     name = parser.getString();
                     break;
                 case VALUE_STRING:
+                    System.out.println("inside map string value");
                     value = parser.getString();
                     map.put(name, value);
                     break;
                 case VALUE_NUMBER:
+                    System.out.println("inside map");
                     value = Integer.toString(parser.getInt());
                     map.put(name, value);
                     break;
             }
         }
-        product.setProductID(Integer.parseInt(map.get("id")));
+        System.out.println("before product set");
+        product.setProductID(Integer.parseInt(map.get("productId")));
         product.setName(map.get("name"));
         product.setDescription(map.get("description"));
         product.setQuantity(Integer.parseInt(map.get("quantity")));
         try {
             productList.add(product);
             //return Response.ok().build();
-            return Response.ok(uri.getAbsolutePath().toString() + "/" + map.get("id")).build();
+            return Response.ok(uri.getAbsolutePath().toString() + "/" + map.get("productId")).build();
         } catch (Exception ex) {
             return Response.status(500).build();
         }

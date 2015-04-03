@@ -7,6 +7,7 @@ package com.bean;
 
 import java.io.StringReader;
 import javax.ejb.MessageDriven;
+
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Message;

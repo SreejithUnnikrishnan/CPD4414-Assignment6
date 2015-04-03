@@ -49,7 +49,7 @@ public class ProductList {
 
     public void add(Product product) throws Exception {
         int changes = 0;
-        //changes = doInsert("INSERT INTO products (name, description, quantity) VALUES (?, ?, ?)", product_name, description, quantity);
+        changes = doInsert("INSERT INTO products (product_id, name, description, quantity) VALUES (?, ?, ?, ?)", product.getProductID(),product.getName(),product.getDescription(),product.getQuantity());
         if (changes > 0) {
             productList.add(product);
         } else {
@@ -122,6 +122,23 @@ public class ProductList {
             pstmt.setString(3, description);
             pstmt.setInt(4, quantity);
             pstmt.setInt(5, pid);
+            numChanges = pstmt.executeUpdate();
+            return numChanges;
+        } catch (SQLException ex) {
+            System.out.println("Sql Exception: " + ex.getMessage());
+            return numChanges;
+        }
+
+    }
+    
+    private int doInsert(String query, int id, String name, String description, int quantity) {
+        int numChanges = 0;
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, id);
+            pstmt.setString(2, name);
+            pstmt.setString(3, description);
+            pstmt.setInt(4, quantity);
             numChanges = pstmt.executeUpdate();
             return numChanges;
         } catch (SQLException ex) {

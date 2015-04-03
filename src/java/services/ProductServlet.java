@@ -169,21 +169,7 @@ public class ProductServlet {
 //        }
     }
 
-    private int doInsert(String query, String name, String description, String quantity) {
-        int numChanges = 0;
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setString(1, name);
-            pstmt.setString(2, description);
-            pstmt.setString(3, quantity);
-            numChanges = pstmt.executeUpdate();
-            return numChanges;
-        } catch (SQLException ex) {
-            System.out.println("Sql Exception: " + ex.getMessage());
-            return numChanges;
-        }
-
-    }
+    
 
     @PUT
     @Path("{id}")

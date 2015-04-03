@@ -164,7 +164,7 @@ public class ProductServlet {
     @Path("{id}")
     @Consumes("application/json")
     public Response doPut(@Context UriInfo uri, @PathParam("id") String id, String str) {
-        Product product = null;
+        Product product = new Product();
         int changes = 0;
         JsonParser parser = Json.createParser(new StringReader(str));
         Map<String, String> map = new HashMap<>();
@@ -192,7 +192,7 @@ public class ProductServlet {
         try {
             productList.set(Integer.parseInt(id), product);
             //return Response.ok().build();
-            return Response.ok(uri.getAbsolutePath().toString() + "/" + id).build();
+            return Response.ok(uri.getAbsolutePath().toString()).build();
         } catch (Exception ex) {
             return Response.status(500).build();
         }

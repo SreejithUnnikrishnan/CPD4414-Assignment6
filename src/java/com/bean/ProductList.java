@@ -47,8 +47,14 @@ public class ProductList {
         }
     }
 
-    public void add(Product product) {
-        productList.add(product);
+    public void add(Product product) throws Exception {
+        int changes = 0;
+        //changes = doInsert("INSERT INTO products (name, description, quantity) VALUES (?, ?, ?)", product_name, description, quantity);
+        if (changes > 0) {
+            productList.add(product);
+        } else {
+            throw new Exception("InsertException");
+        }
     }
 
     public void remove(Product product) {
@@ -66,16 +72,15 @@ public class ProductList {
 
     }
 
-    public void set(int id, Product product) throws Exception{
+    public void set(int id, Product product) throws Exception {
         int changes = 0;
         changes = doUpdate("update products set product_id = ?, name = ?, description = ?, quantity = ? where product_id = ?", product.getProductID(), product.getName(), product.getDescription(), product.getQuantity(), product.getProductID());
-        if(changes > 0){
+        if (changes > 0) {
             Product old = get(id);
             old.setName(product.getName());
             old.setDescription(product.getDescription());
             old.setQuantity(product.getQuantity());
-        }
-        else{
+        } else {
             throw new Exception("UpdateException");
         }
     }
@@ -107,7 +112,7 @@ public class ProductList {
         }
         return jarray.build();
     }
-    
+
     private int doUpdate(String query, int id, String name, String description, int quantity, int pid) {
         int numChanges = 0;
         try (Connection connection = DatabaseConnection.getConnection()) {

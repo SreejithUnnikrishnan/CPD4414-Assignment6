@@ -6,6 +6,8 @@
 package com.bean;
 
 import java.io.StringReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.JMSException;
@@ -35,6 +37,8 @@ public class ProductListener implements MessageListener {
             }
         } catch (JMSException ex) {
             System.out.println("Exceoption in JMS: " + ex.getMessage());
+        } catch (Exception ex) {
+            System.out.println("Exceoption in adding product: " + ex.getMessage());
         }
 
     }

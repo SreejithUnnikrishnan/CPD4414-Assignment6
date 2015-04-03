@@ -5,9 +5,6 @@ package services;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-
-
 import com.bean.Product;
 import com.bean.ProductList;
 import com.database.DatabaseConnection;
@@ -48,7 +45,7 @@ import javax.ws.rs.core.UriInfo;
 @Path("/products")
 @RequestScoped
 public class ProductServlet {
-    
+
     @Inject
     ProductList productList;
 
@@ -58,7 +55,7 @@ public class ProductServlet {
         //String result = getResults("SELECT * FROM products");
         //return result;
         return Response.ok(productList.toJSON()).build();
-        
+
     }
 
     @GET
@@ -67,8 +64,8 @@ public class ProductServlet {
     public Response doGet(@PathParam("id") String id) {
 //        String result = getProduct("SELECT * FROM products WHERE product_id = ?", id);
 //        return result;
-       return Response.ok(productList.get(Integer.parseInt(id)).toJSON()).build();
-        
+        return Response.ok(productList.get(Integer.parseInt(id)).toJSON()).build();
+
     }
 
 //    private String getResults(String query) {
@@ -95,7 +92,6 @@ public class ProductServlet {
 //        }
 //
 //    }
-
 //    private String getProduct(String query, String... params) {
 //        StringBuilder stringBuilder = new StringBuilder();
 //        StringWriter out = new StringWriter();
@@ -124,10 +120,10 @@ public class ProductServlet {
 //        }
 //        return out.toString();
 //    }
-
     @POST
     @Consumes("application/json")
     public Response doPost(@Context UriInfo uri, String str) {
+        Product product = null;
         JsonParser parser = Json.createParser(new StringReader(str));
         Map<String, String> map = new HashMap<>();
         String name = "", value;
@@ -147,20 +143,30 @@ public class ProductServlet {
                     break;
             }
         }
-
-        int changes = 0;
-
-        String product_name = map.get("name");
-        String description = map.get("description");
-        String quantity = map.get("quantity");
-        changes = doInsert("INSERT INTO products (name, description, quantity) VALUES (?, ?, ?)", product_name, description, quantity);
-        if (changes > 0) {
-            int id = getId("select max(product_id) from products");
-            //String res = "http://localhost:8080/CPD4414-Assignment5/webresources/products/" + id;
-            return Response.ok(uri.getAbsolutePath().toString() + "/" + id).build();
-        } else {
+        product.setProductID(Integer.parseInt(map.get("id")));
+        product.setName(map.get("name"));
+        product.setDescription(map.get("description"));
+        product.setQuantity(Integer.parseInt(map.get("quantity")));
+        try {
+            productList.add(product);
+            //return Response.ok().build();
+            return Response.ok(uri.getAbsolutePath().toString() + "/" + map.get("id")).build();
+        } catch (Exception ex) {
             return Response.status(500).build();
         }
+//        int changes = 0;
+//
+//        String product_name = map.get("name");
+//        String description = map.get("description");
+//        String quantity = map.get("quantity");
+//        changes = doInsert("INSERT INTO products (name, description, quantity) VALUES (?, ?, ?)", product_name, description, quantity);
+//        if (changes > 0) {
+//            int id = getId("select max(product_id) from products");
+//            //String res = "http://localhost:8080/CPD4414-Assignment5/webresources/products/" + id;
+//            return Response.ok(uri.getAbsolutePath().toString() + "/" + id).build();
+//        } else {
+//            return Response.status(500).build();
+//        }
     }
 
     private int doInsert(String query, String name, String description, String quantity) {
@@ -210,7 +216,8 @@ public class ProductServlet {
         product.setQuantity(Integer.parseInt(map.get("quantity")));
         try {
             productList.set(Integer.parseInt(id), product);
-            return Response.ok().build();
+            //return Response.ok().build();
+            return Response.ok(uri.getAbsolutePath().toString() + "/" + id).build();
         } catch (Exception ex) {
             return Response.status(500).build();
         }
@@ -234,7 +241,6 @@ public class ProductServlet {
 //        }
 //
 //    }
-
     @DELETE
     @Path("{id}")
     public Response doDelete(@Context UriInfo uri, @PathParam("id") String id) {
